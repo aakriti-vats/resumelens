@@ -5,8 +5,6 @@ import styles from './Navbar.module.css'
 const links = [
   { to: '/', label: 'Home', end: true },
   { to: '/#how-it-works', label: 'How It Works', hash: true },
-  { to: '/fetch-demo', label: 'Fetch Demo' },
-  { to: '/profile', label: 'Profile' },
   { to: '/history', label: 'History' },
   { to: '/compare', label: 'Compare' },
 ]
@@ -47,7 +45,9 @@ export default function Navbar() {
 
   function handleSignOut() {
     localStorage.removeItem('resumelens-auth')
+    localStorage.removeItem('resumelens-user')
     setIsAuth(false)
+    setUser('')
     navigate('/')
   }
 
