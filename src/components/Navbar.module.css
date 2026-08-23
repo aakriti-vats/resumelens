@@ -76,6 +76,22 @@
   color: var(--color-text-secondary);
 }
 
+/* Make signIn usable on both anchor and button elements */
+.signIn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+}
+
+.signIn:hover {
+  background: rgba(79, 70, 229, 0.06);
+  color: var(--color-primary-dark);
+}
+
 .cta {
   display: inline-flex;
   align-items: center;
@@ -87,6 +103,12 @@
   padding: 10px 16px;
   border-radius: 10px;
   box-shadow: var(--shadow-sm);
+}
+
+.user {
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  margin-right: 8px;
 }
 
 .cta:hover {

@@ -1,0 +1,29 @@
+.page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+  display: grid;
+  gap: 24px;
+  text-align: center;
+}
+
+.title {
+  font-size: 2rem;
+  color: var(--color-text);
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 24px;
+}
+
+.homeLink {
+  display: inline-block;
+  margin-top: 12px;
+  background: var(--color-primary-dark);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+}

@@ -6,6 +6,12 @@ import Compare from './pages/Compare'
 import History from './pages/History'
 import Home from './pages/Home'
 import Results from './pages/Results'
+import SignIn from './pages/SignIn'
+import NotFound from './pages/NotFound'
+import FetchDemo from './pages/FetchDemo'
+import ProfileLayout from './pages/ProfileLayout'
+import Profile from './pages/Profile'
+import ProtectedRoute from './components/ProtectedRoute'
 import styles from './App.module.css'
 
 const PAGE_TITLES = {
@@ -34,8 +40,24 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/results" element={<Results />} />
-          <Route path="/compare" element={<Compare />} />
+          <Route
+            path="/compare"
+            element={
+              <ProtectedRoute>
+                <Compare />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/history" element={<History />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/fetch-demo" element={<FetchDemo />} />
+
+          <Route path="/profile" element={<ProfileLayout />}>
+            <Route path=":id" element={<Profile />} />
+            <Route path="me" element={<Profile />} />
+          </Route>
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
       </div>

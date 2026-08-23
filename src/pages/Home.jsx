@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import ScoreRing from '../components/ScoreRing'
 import { analyzeResume } from '../hooks/useKeywordMatch'
 import { useLocalHistory } from '../hooks/useLocalHistory'
 import styles from './Home.module.css'
+import SignInModal from '../components/SignInModal'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -14,6 +15,35 @@ export default function Home() {
   const [jobTitle, setJobTitle] = useState('')
   const [jobDescription, setJobDescription] = useState('')
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('resumelens-pending-form')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        setResumeText(parsed.resumeText || '')
+        setJobDescription(parsed.jobDescription || '')
+        setJobTitle(parsed.jobTitle || '')
+        setResumeName(parsed.resumeName || '')
+        sessionStorage.removeItem('resumelens-pending-form')
+      }
+    } catch {}
+  }, [])
+
+  function requireSignInFor(action = 'use this feature') {
+    const isAuth = localStorage.getItem('resumelens-auth') === '1'
+    if (isAuth) return true
+    // save current form state so we can restore after sign-in
+    try {
+      sessionStorage.setItem(
+        'resumelens-pending-form',
+        JSON.stringify({ resumeText, jobDescription, jobTitle, resumeName }),
+      )
+    } catch {}
+    setSignInTarget('/#analyze')
+    setShowSignInModal(true)
+    return false
+  }
 
   async function handleFile(event) {
     const file = event.target.files?.[0]
@@ -30,6 +60,8 @@ export default function Home() {
   }
 
   function handleClearResume() {
+    const ok = requireSignInFor('clear the resume')
+    if (!ok) return
     setResumeName('')
     setResumeText('')
     setError('')
@@ -51,11 +83,96 @@ export default function Home() {
       jobTitle,
       resumeName,
     })
+
+    const isAuth = localStorage.getItem('resumelens-auth') === '1'
+    if (!isAuth) {
+      // store pending analysis and redirect to sign-in
+      try {
+        sessionStorage.setItem('resumelens-pending-analysis', JSON.stringify(analysis))
+      } catch {}
+      navigate('/signin', { state: { from: '/results' } })
+      return
+    }
+
     addEntry(analysis)
     navigate('/results')
   }
 
+  function handleAnalyzeClick(e) {
+    e.preventDefault()
+    const isAuth = localStorage.getItem('resumelens-auth') === '1'
+    if (!isAuth) {
+      setSignInTarget('/#analyze')
+      setShowSignInModal(true)
+      return
+    }
+    const node = document.getElementById('analyze')
+    if (node) node.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  function handleDropzoneClick(e) {
+    const ok = requireSignInFor('upload a file')
+    if (!ok) return
+    fileRef.current?.click()
+  }
+
+  function handleInputClick(e) {
+    const ok = requireSignInFor('upload a file')
+    if (!ok) e.preventDefault()
+  }
+
+  function handleFieldFocus() {
+    requireSignInFor('edit this field')
+  }
+
+  const [showSignInModal, setShowSignInModal] = useState(false)
+  const [signInTarget, setSignInTarget] = useState(null)
+
+  function handleModalClose() {
+    setShowSignInModal(false)
+    setSignInTarget(null)
+  }
+
+  function handleModalSignedIn(target) {
+    // commit pending analysis if present
+    try {
+      const raw = sessionStorage.getItem('resumelens-pending-analysis')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        addEntry(parsed)
+        sessionStorage.removeItem('resumelens-pending-analysis')
+        // go to results
+        navigate('/results')
+        return
+      }
+    } catch {}
+
+    // restore form if present
+    try {
+      const rawForm = sessionStorage.getItem('resumelens-pending-form')
+      if (rawForm) {
+        const parsed = JSON.parse(rawForm)
+        setResumeText(parsed.resumeText || '')
+        setJobDescription(parsed.jobDescription || '')
+        setJobTitle(parsed.jobTitle || '')
+        setResumeName(parsed.resumeName || '')
+        sessionStorage.removeItem('resumelens-pending-form')
+      }
+    } catch {}
+
+    // navigate or scroll depending on target
+    if (target === '/results') {
+      navigate('/results')
+    } else if (target && target.includes('#analyze')) {
+      const node = document.getElementById('analyze')
+      if (node) node.scrollIntoView({ behavior: 'smooth' })
+    } else if (target) {
+      navigate(target)
+    }
+  }
+
   return (
+    <>
     <main>
       <div className={styles.page}>
         <section className={styles.hero} aria-labelledby="hero-heading">
@@ -69,9 +186,9 @@ export default function Home() {
               keyword analysis and actionable recommendations.
             </p>
             <div className={styles.heroActions}>
-              <a className={styles.primary} href="#analyze">
+              <button type="button" className={styles.primary} onClick={handleAnalyzeClick}>
                 Analyze My Resume
-              </a>
+              </button>
               <a className={styles.secondary} href="#how-it-works">
                 See How It Works
               </a>
@@ -137,7 +254,7 @@ export default function Home() {
               <button
                 type="button"
                 className={styles.dropzone}
-                onClick={() => fileRef.current?.click()}
+                onClick={handleDropzoneClick}
               >
                 <strong>
                   {resumeName || 'Drag & drop your file here'}
@@ -150,6 +267,7 @@ export default function Home() {
                 type="file"
                 accept=".pdf,.doc,.docx,.txt"
                 onChange={handleFile}
+                onClick={handleInputClick}
               />
               <p className={styles.divider}>OR PASTE TEXT</p>
               <label className={styles.label} htmlFor="resume-text">
@@ -161,6 +279,7 @@ export default function Home() {
                 placeholder="Paste your resume text here..."
                 value={resumeText}
                 onChange={(event) => setResumeText(event.target.value)}
+                onFocus={handleFieldFocus}
               />
             </article>
 
@@ -186,6 +305,7 @@ export default function Home() {
                 placeholder="e.g. Senior Product Designer"
                 value={jobTitle}
                 onChange={(event) => setJobTitle(event.target.value)}
+                onFocus={handleFieldFocus}
               />
               <label className={`${styles.label} ${styles.spacedLabel}`} htmlFor="job-details">
                 Job Details
@@ -196,6 +316,7 @@ export default function Home() {
                 placeholder="Paste the full job description here..."
                 value={jobDescription}
                 onChange={(event) => setJobDescription(event.target.value)}
+                onFocus={handleFieldFocus}
               />
             </article>
             {error ? (
@@ -236,5 +357,12 @@ export default function Home() {
         </section>
       </div>
     </main>
+    <SignInModal
+      open={showSignInModal}
+      onClose={handleModalClose}
+      onSignedIn={handleModalSignedIn}
+      target={signInTarget}
+    />
+    </>
   )
 }

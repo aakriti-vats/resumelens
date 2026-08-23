@@ -1,10 +1,12 @@
 import { useEffect, useId, useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import styles from './Navbar.module.css'
 
 const links = [
   { to: '/', label: 'Home', end: true },
   { to: '/#how-it-works', label: 'How It Works', hash: true },
+  { to: '/fetch-demo', label: 'Fetch Demo' },
+  { to: '/profile', label: 'Profile' },
   { to: '/history', label: 'History' },
   { to: '/compare', label: 'Compare' },
 ]
@@ -13,10 +15,41 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const menuId = useId()
   const location = useLocation()
+  const navigate = useNavigate()
+  const [isAuth, setIsAuth] = useState(
+    () => localStorage.getItem('resumelens-auth') === '1',
+  )
+  const [user, setUser] = useState(() => {
+    try {
+      const raw = localStorage.getItem('resumelens-user')
+      return raw ? JSON.parse(raw) : ''
+    } catch {
+      return localStorage.getItem('resumelens-user') || ''
+    }
+  })
 
   useEffect(() => {
     setOpen(false)
   }, [location.pathname, location.hash])
+
+  useEffect(() => {
+    function onStorage(e) {
+      if (e.key === 'resumelens-auth') {
+        setIsAuth(localStorage.getItem('resumelens-auth') === '1')
+      }
+      if (e.key === 'resumelens-user') {
+        setUser(localStorage.getItem('resumelens-user') || '')
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
+  function handleSignOut() {
+    localStorage.removeItem('resumelens-auth')
+    setIsAuth(false)
+    navigate('/')
+  }
 
   return (
     <header className={styles.header}>
@@ -62,17 +95,12 @@ export default function Navbar() {
               )}
             </li>
           ))}
-          <li className={styles.mobileOnly}>
-            <NavLink to="/" className={styles.signIn}>
-              Sign In
-            </NavLink>
-          </li>
         </ul>
 
         <div className={styles.actions}>
-          <a href="#signin" className={styles.signIn}>
-            Sign In
-          </a>
+          <NavLink to="/profile" className={styles.signIn}>
+            {(user && user.name) || 'Profile'}
+          </NavLink>
           <NavLink to="/" className={styles.cta}>
             Analyze Resume
           </NavLink>
