@@ -1,0 +1,118 @@
+.page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 40px 24px 72px;
+}
+
+.page h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.banner {
+  margin: 20px 0 24px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+}
+
+.banner p {
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.winner {
+  border: 2px solid var(--color-primary-dark);
+}
+
+.muted {
+  opacity: 0.95;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.version {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.8125rem;
+}
+
+.winnerBadge {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+}
+
+.metrics {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.metrics li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.alert {
+  color: var(--color-missing);
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.primary {
+  background: var(--color-primary-dark);
+  color: #fff;
+}
+
+.secondary {
+  border: 1px solid var(--color-border-strong);
+}
+
+@media (max-width: 800px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
