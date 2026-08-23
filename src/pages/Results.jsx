@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import KeywordBadge from '../components/KeywordBadge'
 import ScoreRing from '../components/ScoreRing'
@@ -13,6 +14,15 @@ function matchLabel(score) {
 export default function Results() {
   const { entries, getLastAnalysis } = useLocalHistory()
   const analysis = getLastAnalysis() ?? entries[0]
+  const resultsRef = useRef(null)
+
+  useEffect(() => {
+    if (!analysis) return
+    const node = resultsRef.current
+    if (!node) return
+    node.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    node.focus({ preventScroll: true })
+  }, [analysis?.id])
 
   if (!analysis) {
     return (
@@ -29,7 +39,9 @@ export default function Results() {
   return (
     <main className={styles.page}>
       <header className={styles.heading}>
-        <h1>Resume Analysis</h1>
+        <h1 ref={resultsRef} id="results" tabIndex={-1}>
+          Resume Analysis
+        </h1>
         <p>Reviewing your resume against “{analysis.jobTitle}”.</p>
         <ul className={styles.meta}>
           <li>{analysis.resumeName}</li>

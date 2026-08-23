@@ -29,6 +29,16 @@ export default function Home() {
     }
   }
 
+  function handleClearResume() {
+    setResumeName('')
+    setResumeText('')
+    setError('')
+    // File inputs are uncontrolled; React state cannot clear the FileList.
+    if (fileRef.current) {
+      fileRef.current.value = ''
+    }
+  }
+
   function handleSubmit(event) {
     event.preventDefault()
     if (!resumeText.trim() && !jobDescription.trim()) {
@@ -101,19 +111,29 @@ export default function Home() {
           </p>
           <form className={styles.form} onSubmit={handleSubmit}>
             <article className={styles.card}>
-              <h2>
-                <span className={styles.icon} aria-hidden="true">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    />
-                    <path d="M14 3v6h6" stroke="currentColor" strokeWidth="2" />
-                  </svg>
-                </span>
-                Your Resume
-              </h2>
+              <div className={styles.cardHeading}>
+                <h2>
+                  <span className={styles.icon} aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <path d="M14 3v6h6" stroke="currentColor" strokeWidth="2" />
+                    </svg>
+                  </span>
+                  Your Resume
+                </h2>
+                <button
+                  type="button"
+                  className={styles.clear}
+                  onClick={handleClearResume}
+                  disabled={!resumeName && !resumeText}
+                >
+                  Clear resume
+                </button>
+              </div>
               <button
                 type="button"
                 className={styles.dropzone}

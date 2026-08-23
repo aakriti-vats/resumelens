@@ -9,6 +9,15 @@
   margin-bottom: 8px;
 }
 
+.heading h1:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+}
+
+.heading h1:focus:not(:focus-visible) {
+  outline: none;
+}
+
 .heading p {
   margin-bottom: 12px;
 }
