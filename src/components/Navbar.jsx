@@ -5,7 +5,6 @@ import styles from './Navbar.module.css'
 const links = [
   { to: '/', label: 'Home', end: true },
   { to: '/#how-it-works', label: 'How It Works', hash: true },
-  { to: '/profile', label: 'Profile' },
   { to: '/history', label: 'History' },
   { to: '/compare', label: 'Compare' },
 ]
