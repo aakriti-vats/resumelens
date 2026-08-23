@@ -1,15 +1,8 @@
 import { Link } from 'react-router-dom'
 import ScoreRing from '../components/ScoreRing'
 import { useLocalHistory } from '../hooks/useLocalHistory'
+import { formatDate } from '../utils/formatDate'
 import styles from './History.module.css'
-
-function formatDate(iso) {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date(iso))
-}
 
 export default function History() {
   const { entries, removeEntry, setLastAnalysis } = useLocalHistory()
@@ -30,6 +23,9 @@ export default function History() {
         <section className={styles.empty}>
           <h2>No scans yet</h2>
           <p>Analyze a resume to start building local history.</p>
+          <Link className={styles.primary} to="/">
+            Analyze Resume
+          </Link>
         </section>
       ) : (
         <section aria-label="Past analyses">

@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import styles from './Navbar.module.css'
 
@@ -13,10 +13,20 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const menuId = useId()
   const location = useLocation()
+  const signInDialogRef = useRef(null)
 
   useEffect(() => {
     setOpen(false)
   }, [location.pathname, location.hash])
+
+  function openSignInDialog() {
+    setOpen(false)
+    signInDialogRef.current?.showModal()
+  }
+
+  function closeSignInDialog() {
+    signInDialogRef.current?.close()
+  }
 
   return (
     <header className={styles.header}>
@@ -63,16 +73,16 @@ export default function Navbar() {
             </li>
           ))}
           <li className={styles.mobileOnly}>
-            <NavLink to="/" className={styles.signIn}>
+            <button type="button" className={styles.signIn} onClick={openSignInDialog}>
               Sign In
-            </NavLink>
+            </button>
           </li>
         </ul>
 
         <div className={styles.actions}>
-          <a href="#signin" className={styles.signIn}>
+          <button type="button" className={styles.signIn} onClick={openSignInDialog}>
             Sign In
-          </a>
+          </button>
           <NavLink to="/" className={styles.cta}>
             Analyze Resume
           </NavLink>
@@ -90,6 +100,21 @@ export default function Navbar() {
           </button>
         </div>
       </nav>
+
+      <dialog
+        ref={signInDialogRef}
+        className={styles.signInDialog}
+        aria-labelledby="signin-dialog-title"
+      >
+        <h2 id="signin-dialog-title">Sign in to ResumeLens</h2>
+        <p>
+          Accounts are not set up in this version yet. Your analyses stay saved
+          privately in this browser.
+        </p>
+        <button type="button" className={styles.cta} onClick={closeSignInDialog}>
+          Got it
+        </button>
+      </dialog>
     </header>
   )
 }

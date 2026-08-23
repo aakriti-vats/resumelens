@@ -71,9 +71,42 @@
 }
 
 .signIn {
+  border: 0;
+  background: none;
+  padding: 8px 0;
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--color-text-secondary);
+}
+
+.signIn:hover {
+  color: var(--color-text);
+}
+
+.mobileOnly {
+  display: none;
+}
+
+.signInDialog {
+  border: 0;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 28px;
+  width: min(400px, calc(100vw - 48px));
+}
+
+.signInDialog::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.signInDialog h2 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+
+.signInDialog p {
+  color: var(--color-text-muted);
+  margin-bottom: 20px;
 }
 
 .cta {
@@ -111,10 +144,6 @@
   width: 100%;
   background: var(--color-text);
   border-radius: var(--radius-pill);
-}
-
-.mobileOnly {
-  display: none;
 }
 
 @media (max-width: 800px) {

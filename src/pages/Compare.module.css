@@ -2,11 +2,37 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 40px 24px 72px;
+  overflow-wrap: break-word;
 }
 
 .page h1 {
   font-size: 2rem;
   margin-bottom: 8px;
+}
+
+.empty {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 48px 24px;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.empty h1 {
+  font-size: 1.75rem;
+  margin-bottom: 0;
+}
+
+.empty p {
+  color: var(--color-text-muted);
+  max-width: 46ch;
+}
+
+.empty .primary {
+  margin-top: 8px;
 }
 
 .banner {
@@ -54,6 +80,10 @@
   gap: 12px;
 }
 
+.cardHeader > div {
+  min-width: 0;
+}
+
 .version {
   display: flex;
   align-items: center;
@@ -98,6 +128,7 @@
   justify-content: center;
   align-items: center;
   min-height: 44px;
+  padding: 10px 18px;
   border-radius: 10px;
   font-weight: 600;
 }
@@ -108,7 +139,9 @@
 }
 
 .secondary {
+  background: var(--color-surface);
   border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
 }
 
 @media (max-width: 800px) {

@@ -2,6 +2,31 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 40px 24px 72px;
+  overflow-wrap: break-word;
+}
+
+.empty {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 48px 24px;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.empty h1 {
+  font-size: 1.75rem;
+}
+
+.empty p {
+  color: var(--color-text-muted);
+  max-width: 46ch;
+}
+
+.empty .primary {
+  margin-top: 8px;
 }
 
 .heading h1 {

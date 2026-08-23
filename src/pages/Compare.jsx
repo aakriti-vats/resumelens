@@ -11,9 +11,16 @@ export default function Compare() {
   if (!versionB) {
     return (
       <main className={styles.page}>
-        <h1>Compare Versions</h1>
-        <p>Run at least one analysis to compare resume versions.</p>
-        <Link to="/">Analyze Resume</Link>
+        <div className={styles.empty}>
+          <h1>No versions to compare yet</h1>
+          <p>
+            Run at least one analysis and it will appear here for a
+            side-by-side comparison.
+          </p>
+          <Link className={styles.primary} to="/">
+            Analyze Resume
+          </Link>
+        </div>
       </main>
     )
   }
@@ -104,7 +111,7 @@ function VersionCard({ title, subtitle, analysis, winner, muted }) {
         </li>
       </ul>
       <Link className={winner ? styles.primary : styles.secondary} to="/results">
-        {winner ? 'View details' : 'View details'}
+        View details
       </Link>
     </article>
   )

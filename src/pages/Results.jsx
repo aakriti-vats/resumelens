@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import KeywordBadge from '../components/KeywordBadge'
 import ScoreRing from '../components/ScoreRing'
 import { useLocalHistory } from '../hooks/useLocalHistory'
+import { formatDateTime } from '../utils/formatDate'
 import styles from './Results.module.css'
 
 function matchLabel(score) {
@@ -17,11 +18,16 @@ export default function Results() {
   if (!analysis) {
     return (
       <main className={styles.page}>
-        <h1>Analysis Results</h1>
-        <p>No scan yet. Upload a resume to see your ATS match dashboard.</p>
-        <p>
-          <Link to="/">Analyze Resume</Link>
-        </p>
+        <div className={styles.empty}>
+          <h1>No analysis yet</h1>
+          <p>
+            Upload a resume and paste a job description to see your ATS match
+            dashboard.
+          </p>
+          <Link className={styles.primary} to="/">
+            Analyze Resume
+          </Link>
+        </div>
       </main>
     )
   }
@@ -34,7 +40,15 @@ export default function Results() {
         <ul className={styles.meta}>
           <li>{analysis.resumeName}</li>
           <li>{analysis.jobTitle}</li>
-          <li>Analyzed just now</li>
+          <li>
+            {analysis.createdAt ? (
+              <time dateTime={analysis.createdAt}>
+                {formatDateTime(analysis.createdAt)}
+              </time>
+            ) : (
+              'Recently analyzed'
+            )}
+          </li>
         </ul>
       </header>
 

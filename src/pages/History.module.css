@@ -2,6 +2,7 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 40px 24px 96px;
+  overflow-wrap: break-word;
 }
 
 .heading {
@@ -36,6 +37,23 @@
   padding: 24px;
 }
 
+.empty {
+  padding: 48px 24px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.empty p {
+  color: var(--color-text-muted);
+  max-width: 46ch;
+}
+
+.empty .primary {
+  margin-top: 8px;
+}
+
 .list {
   list-style: none;
   margin: 0;
@@ -50,6 +68,10 @@
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+}
+
+.top > div {
+  min-width: 0;
 }
 
 .top h2 {

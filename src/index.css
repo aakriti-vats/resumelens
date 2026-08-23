@@ -92,3 +92,9 @@ svg {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+
+/* Keep anchored sections clear of the sticky navbar */
+#analyze,
+#how-it-works {
+  scroll-margin-top: calc(var(--nav-height) + 16px);
+}

@@ -1,3 +1,10 @@
+/**
+ * Pure keyword-analysis logic for ResumeLens.
+ *
+ * These functions have no React or browser dependencies, so they are easy to
+ * test and reuse. React hooks live in src/hooks/, not here.
+ */
+
 const STOPWORDS = new Set([
   'about',
   'after',

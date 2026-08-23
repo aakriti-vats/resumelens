@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import ScoreRing from '../components/ScoreRing'
-import { analyzeResume } from '../hooks/useKeywordMatch'
+import { analyzeResume } from '../utils/keywordAnalysis'
 import { useLocalHistory } from '../hooks/useLocalHistory'
 import styles from './Home.module.css'
 
@@ -58,6 +58,7 @@ export default function Home() {
   const [errors, setErrors] = useState([])
   const [isDragging, setIsDragging] = useState(false)
   const [needsTextExtract, setNeedsTextExtract] = useState(false)
+  const [isReadingFile, setIsReadingFile] = useState(false)
 
   function resetFileInput() {
     if (fileRef.current) {
@@ -78,8 +79,18 @@ export default function Home() {
     setErrors([])
 
     if (kind === 'txt') {
-      setResumeText(await file.text())
-      setNeedsTextExtract(false)
+      setIsReadingFile(true)
+      try {
+        setResumeText(await file.text())
+        setNeedsTextExtract(false)
+      } catch {
+        setResumeName('')
+        setErrors([
+          'We could not read that file. Please try again or paste your resume text below.',
+        ])
+      } finally {
+        setIsReadingFile(false)
+      }
     } else {
       setNeedsTextExtract(true)
     }
@@ -156,7 +167,7 @@ export default function Home() {
       <div className={styles.page}>
         <section className={styles.hero} aria-labelledby="hero-heading">
           <div>
-            <p className={styles.eyebrow}>AI-powered resume optimization</p>
+            <p className={styles.eyebrow}>ATS-focused resume optimization</p>
             <h1 id="hero-heading">
               Make your resume <span className={styles.accent}>match the job.</span>
             </h1>
@@ -202,8 +213,8 @@ export default function Home() {
         <section id="analyze" aria-labelledby="analyze-heading">
           <h1 id="analyze-heading">Analyze Resume</h1>
           <p className={styles.lede}>
-            Upload your resume and the target job description to get AI-powered
-            feedback.
+            Upload your resume and the target job description to get instant
+            keyword feedback.
           </p>
           <form className={styles.form} onSubmit={handleSubmit}>
             <article className={styles.card}>
@@ -227,13 +238,15 @@ export default function Home() {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                disabled={isReadingFile}
               >
                 <strong>
                   {resumeName || 'Drag & drop your file here'}
                 </strong>
                 <small>
-                  Supported formats: PDF, DOCX, TXT. Max file size 5MB. TXT is
-                  read automatically; paste PDF or DOCX text below.
+                  {isReadingFile
+                    ? 'Reading file…'
+                    : 'Supported formats: PDF, DOCX, TXT. Max file size 5MB. TXT is read automatically; paste PDF or DOCX text below.'}
                 </small>
               </button>
               <input
@@ -316,8 +329,12 @@ export default function Home() {
               </div>
             ) : null}
             <div className={styles.submitRow}>
-              <button className={styles.submit} type="submit">
-                Analyze Resume
+              <button
+                className={styles.submit}
+                type="submit"
+                disabled={isReadingFile}
+              >
+                {isReadingFile ? 'Reading file…' : 'Analyze Resume'}
               </button>
             </div>
           </form>

@@ -2,6 +2,7 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 40px 24px 72px;
+  overflow-wrap: break-word;
 }
 
 .hero {
@@ -184,6 +185,12 @@
   color: var(--color-text-muted);
 }
 
+.dropzone:disabled,
+.submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
 .fileInput {
   position: absolute;
   width: 1px;
@@ -248,7 +255,17 @@
 
 .error {
   grid-column: 1 / -1;
-  color: var(--color-missing);
+  display: grid;
+  gap: 4px;
+  background: var(--color-missing-bg);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  color: #b91c1c;
+}
+
+.error p {
+  font-size: 0.9375rem;
+  font-weight: 500;
 }
 
 .historyLink {
