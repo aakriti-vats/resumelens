@@ -24,7 +24,6 @@ export default function SignInModal({ open, onClose, onSignedIn, target }) {
       } catch {}
     } catch {}
 
-    // After sign-in, call callback to let caller handle pending analysis or navigation
     if (onSignedIn) onSignedIn(target)
     onClose()
   }

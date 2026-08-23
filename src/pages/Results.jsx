@@ -11,6 +11,19 @@ function matchLabel(score) {
   return 'Needs Work'
 }
 
+function formatDateTime(iso) {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return 'Recently analyzed'
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date)
+}
+
 export default function Results() {
   const { entries, getLastAnalysis } = useLocalHistory()
   const analysis = getLastAnalysis() ?? entries[0]
@@ -46,7 +59,11 @@ export default function Results() {
         <ul className={styles.meta}>
           <li>{analysis.resumeName}</li>
           <li>{analysis.jobTitle}</li>
-          <li>Analyzed just now</li>
+          <li>
+            <time dateTime={analysis.createdAt ?? new Date().toISOString()}>
+              {formatDateTime(analysis.createdAt ?? new Date().toISOString())}
+            </time>
+          </li>
         </ul>
       </header>
 

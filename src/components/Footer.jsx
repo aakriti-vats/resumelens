@@ -21,7 +21,7 @@ export default function Footer() {
             </li>
           </ul>
         </nav>
-        <p className={styles.copy}>© 2024 ResumeLens AI. All rights reserved.</p>
+        <p className={styles.copy}>© 2024 ResumeLens. All rights reserved.</p>
       </div>
     </footer>
   )

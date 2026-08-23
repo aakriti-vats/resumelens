@@ -11,6 +11,7 @@ import NotFound from './pages/NotFound'
 import FetchDemo from './pages/FetchDemo'
 import ProfileLayout from './pages/ProfileLayout'
 import Profile from './pages/Profile'
+import ProfileMe from './pages/ProfileMe'
 import ProtectedRoute from './components/ProtectedRoute'
 import styles from './App.module.css'
 
@@ -19,6 +20,8 @@ const PAGE_TITLES = {
   '/results': 'ResumeLens — Analysis Results',
   '/compare': 'ResumeLens — Compare Versions',
   '/history': 'ResumeLens — Analysis History',
+  '/profile': 'ResumeLens — Profile',
+  '/profile/me': 'ResumeLens — My Profile',
 }
 
 function DocumentTitle() {
@@ -52,10 +55,9 @@ export default function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/fetch-demo" element={<FetchDemo />} />
 
-          <Route path="/profile" element={<ProfileLayout />}>
-            <Route path=":id" element={<Profile />} />
-            <Route path="me" element={<Profile />} />
-          </Route>
+          <Route path="/profile" element={<ProfileMe />} />
+          <Route path="/profile/me" element={<ProfileMe />} />
+          <Route path="/profile/:id" element={<Profile />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
