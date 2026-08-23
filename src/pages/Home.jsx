@@ -5,6 +5,48 @@ import { analyzeResume } from '../hooks/useKeywordMatch'
 import { useLocalHistory } from '../hooks/useLocalHistory'
 import styles from './Home.module.css'
 
+const MAX_FILE_BYTES = 5 * 1024 * 1024
+
+function getResumeFileKind(file) {
+  const name = file.name.toLowerCase()
+  const type = file.type
+
+  if (name.endsWith('.txt') || type === 'text/plain') return 'txt'
+  if (name.endsWith('.pdf') || type === 'application/pdf') return 'pdf'
+  if (
+    name.endsWith('.docx') ||
+    type ===
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ) {
+    return 'docx'
+  }
+
+  return null
+}
+
+function validateResumeFile(file) {
+  if (!file) {
+    return { ok: false, message: 'Choose a resume file to upload.' }
+  }
+
+  if (file.size > MAX_FILE_BYTES) {
+    return {
+      ok: false,
+      message: 'That file is too large. The maximum size is 5MB.',
+    }
+  }
+
+  if (!getResumeFileKind(file)) {
+    return {
+      ok: false,
+      message:
+        'That file type is not supported. Please upload a PDF, DOCX, or TXT file.',
+    }
+  }
+
+  return { ok: true }
+}
+
 export default function Home() {
   const navigate = useNavigate()
   const { addEntry } = useLocalHistory()
@@ -13,28 +55,92 @@ export default function Home() {
   const [resumeText, setResumeText] = useState('')
   const [jobTitle, setJobTitle] = useState('')
   const [jobDescription, setJobDescription] = useState('')
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState([])
+  const [isDragging, setIsDragging] = useState(false)
+  const [needsTextExtract, setNeedsTextExtract] = useState(false)
 
-  async function handleFile(event) {
-    const file = event.target.files?.[0]
-    if (!file) return
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Max file size is 5MB.')
+  function resetFileInput() {
+    if (fileRef.current) {
+      fileRef.current.value = ''
+    }
+  }
+
+  async function applyResumeFile(file) {
+    const result = validateResumeFile(file)
+    if (!result.ok) {
+      setErrors([result.message])
+      resetFileInput()
       return
     }
+
+    const kind = getResumeFileKind(file)
     setResumeName(file.name)
-    setError('')
-    if (file.type.startsWith('text/') || file.name.endsWith('.txt')) {
+    setErrors([])
+
+    if (kind === 'txt') {
       setResumeText(await file.text())
+      setNeedsTextExtract(false)
+    } else {
+      setNeedsTextExtract(true)
     }
+
+    resetFileInput()
+  }
+
+  function clearSelectedResume() {
+    setResumeName('')
+    setNeedsTextExtract(false)
+    resetFileInput()
+  }
+
+  async function handleFileChange(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    await applyResumeFile(file)
+  }
+
+  function handleDragOver(event) {
+    event.preventDefault()
+    setIsDragging(true)
+  }
+
+  function handleDragLeave(event) {
+    event.preventDefault()
+    setIsDragging(false)
+  }
+
+  async function handleDrop(event) {
+    event.preventDefault()
+    setIsDragging(false)
+    const file = event.dataTransfer.files?.[0]
+    if (!file) return
+    await applyResumeFile(file)
   }
 
   function handleSubmit(event) {
     event.preventDefault()
-    if (!resumeText.trim() && !jobDescription.trim()) {
-      setError('Paste resume text and a job description to analyze.')
+    const nextErrors = []
+
+    if (!resumeText.trim()) {
+      nextErrors.push(
+        needsTextExtract
+          ? 'This PDF or DOCX file cannot be read automatically. Paste your resume text below to continue.'
+          : 'Resume is required. Upload a TXT file or paste your resume text.',
+      )
+    }
+
+    if (!jobDescription.trim()) {
+      nextErrors.push(
+        'Job description is required. Paste the job details to continue.',
+      )
+    }
+
+    if (nextErrors.length) {
+      setErrors(nextErrors)
       return
     }
+
+    setErrors([])
     const analysis = analyzeResume({
       resumeText,
       jobDescription,
@@ -116,21 +222,45 @@ export default function Home() {
               </h2>
               <button
                 type="button"
-                className={styles.dropzone}
+                className={`${styles.dropzone} ${isDragging ? styles.dropzoneActive : ''}`}
                 onClick={() => fileRef.current?.click()}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
               >
                 <strong>
                   {resumeName || 'Drag & drop your file here'}
                 </strong>
-                <small>Supported formats: PDF, DOCX, TXT. Max file size 5MB.</small>
+                <small>
+                  Supported formats: PDF, DOCX, TXT. Max file size 5MB. TXT is
+                  read automatically; paste PDF or DOCX text below.
+                </small>
               </button>
               <input
                 ref={fileRef}
+                id="resume-file"
                 className={styles.fileInput}
                 type="file"
-                accept=".pdf,.doc,.docx,.txt"
-                onChange={handleFile}
+                accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                aria-label="Upload resume file"
+                onChange={handleFileChange}
               />
+              {resumeName ? (
+                <button
+                  type="button"
+                  className={styles.clearFile}
+                  onClick={clearSelectedResume}
+                >
+                  Remove file
+                </button>
+              ) : null}
+              {needsTextExtract ? (
+                <p className={styles.extractNote}>
+                  This PDF or DOCX file was accepted, but text extraction is not
+                  available in this project. Paste the resume text below to
+                  analyze it.
+                </p>
+              ) : null}
               <p className={styles.divider}>OR PASTE TEXT</p>
               <label className={styles.label} htmlFor="resume-text">
                 Resume text
@@ -178,10 +308,12 @@ export default function Home() {
                 onChange={(event) => setJobDescription(event.target.value)}
               />
             </article>
-            {error ? (
-              <p className={styles.error} role="alert">
-                {error}
-              </p>
+            {errors.length ? (
+              <div className={styles.error} role="alert">
+                {errors.map((message) => (
+                  <p key={message}>{message}</p>
+                ))}
+              </div>
             ) : null}
             <div className={styles.submitRow}>
               <button className={styles.submit} type="submit">
