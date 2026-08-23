@@ -2,7 +2,7 @@
 
 An AI-assisted, client-side ATS (Applicant Tracking System) resume analyzer. This Single Page Application (SPA) allows users to evaluate their resumes against specific job descriptions to calculate keyword match scores and identify missing qualifications.
 
-**Built for Front End Engineering-II Project Evaluation.**
+
 
 ## ✨ Features
 * **Interactive File Parsing:** Drag-and-drop upload zone for text extraction.
