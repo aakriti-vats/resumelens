@@ -143,12 +143,38 @@
   padding: 24px;
 }
 
+.cardHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
 .card h2 {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 1.125rem;
-  margin-bottom: 16px;
+  margin: 0 0 16px;
+}
+
+.cardHeading h2 {
+  margin: 0;
+}
+
+.clear {
+  background: none;
+  border: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 0 4px;
+}
+
+.clear:disabled {
+  opacity: 0.45;
 }
 
 .icon {

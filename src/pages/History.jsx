@@ -41,6 +41,7 @@ export default function History() {
                     <div>
                       <h2>{entry.resumeName}</h2>
                       <p>{entry.jobTitle}</p>
+                      {entry.user ? <p className={styles.entryUser}>By {entry.user.name}</p> : null}
                     </div>
                     <ScoreRing score={entry.score} size={72} strokeWidth={7} />
                   </div>

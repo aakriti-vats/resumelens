@@ -20,10 +20,19 @@ export function useLocalHistory() {
   const [entries, setEntries] = useState(() => readJson(STORAGE_KEY, []))
 
   const addEntry = useCallback((entry) => {
+    const userRaw = localStorage.getItem('resumelens-user')
+    let user = null
+    try {
+      user = userRaw ? JSON.parse(userRaw) : null
+    } catch {
+      user = userRaw
+    }
+
     const record = {
       ...entry,
       id: entry.id ?? crypto.randomUUID(),
       createdAt: entry.createdAt ?? new Date().toISOString(),
+      user: user ? { id: user.id, name: user.name, email: user.email } : null,
     }
     setEntries((prev) => {
       const next = [record, ...prev]

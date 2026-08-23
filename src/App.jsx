@@ -1,22 +1,63 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { useEffect } from 'react'
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
 import Compare from './pages/Compare'
 import History from './pages/History'
 import Home from './pages/Home'
 import Results from './pages/Results'
+import SignIn from './pages/SignIn'
+import NotFound from './pages/NotFound'
+import FetchDemo from './pages/FetchDemo'
+import ProfileLayout from './pages/ProfileLayout'
+import Profile from './pages/Profile'
+import ProtectedRoute from './components/ProtectedRoute'
 import styles from './App.module.css'
+
+const PAGE_TITLES = {
+  '/': 'ResumeLens — Analyze Resume',
+  '/results': 'ResumeLens — Analysis Results',
+  '/compare': 'ResumeLens — Compare Versions',
+  '/history': 'ResumeLens — Analysis History',
+}
+
+function DocumentTitle() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    document.title = PAGE_TITLES[pathname] ?? 'ResumeLens — ATS Resume Analyzer'
+  }, [pathname])
+
+  return null
+}
 
 export default function App() {
   return (
     <BrowserRouter>
+      <DocumentTitle />
       <div className={styles.shell}>
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/results" element={<Results />} />
-          <Route path="/compare" element={<Compare />} />
+          <Route
+            path="/compare"
+            element={
+              <ProtectedRoute>
+                <Compare />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/history" element={<History />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/fetch-demo" element={<FetchDemo />} />
+
+          <Route path="/profile" element={<ProfileLayout />}>
+            <Route path=":id" element={<Profile />} />
+            <Route path="me" element={<Profile />} />
+          </Route>
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
       </div>
