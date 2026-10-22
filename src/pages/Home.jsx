@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import ScoreRing from '../components/ScoreRing'
 import { analyzeResume } from '../utils/keywordAnalysis'
+import { useAnalysis } from '../context/AnalysisContext'
 import { useLocalHistory } from '../hooks/useLocalHistory'
 import styles from './Home.module.css'
 
@@ -50,6 +51,7 @@ function validateResumeFile(file) {
 export default function Home() {
   const navigate = useNavigate()
   const { addEntry } = useLocalHistory()
+  const { setCurrentAnalysis } = useAnalysis()
   const fileRef = useRef(null)
   const [resumeName, setResumeName] = useState('')
   const [resumeText, setResumeText] = useState('')
@@ -158,7 +160,8 @@ export default function Home() {
       jobTitle,
       resumeName,
     })
-    addEntry(analysis)
+    const savedRecord = addEntry(analysis)
+    setCurrentAnalysis(savedRecord)
     navigate('/results')
   }
 

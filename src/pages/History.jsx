@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
 import ScoreRing from '../components/ScoreRing'
+import { useAnalysis } from '../context/AnalysisContext'
 import { useLocalHistory } from '../hooks/useLocalHistory'
 import { formatDate } from '../utils/formatDate'
 import styles from './History.module.css'
 
 export default function History() {
   const { entries, removeEntry, setLastAnalysis } = useLocalHistory()
+  const { setCurrentAnalysis } = useAnalysis()
 
   return (
     <main className={styles.page}>
@@ -47,7 +49,10 @@ export default function History() {
                         className={styles.iconButton}
                         to="/results"
                         aria-label={`View results for ${entry.resumeName}`}
-                        onClick={() => setLastAnalysis(entry)}
+                        onClick={() => {
+                          setCurrentAnalysis(entry)
+                          setLastAnalysis(entry)
+                        }}
                       >
                         View
                       </Link>
