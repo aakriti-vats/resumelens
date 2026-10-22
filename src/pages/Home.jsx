@@ -105,13 +105,13 @@ export default function Home() {
         } else {
           setNeedsTextExtract(true)
           setErrors([
-            'This PDF appears to be scanned or image-based with no selectable text. Please paste your resume text below.',
+            "We couldn't extract usable text from this file. Paste your resume text below to continue.",
           ])
         }
       } catch {
         setNeedsTextExtract(true)
         setErrors([
-          'We could not extract text from that PDF. Please paste your resume text below to continue.',
+          "We couldn't extract usable text from this file. Paste your resume text below to continue.",
         ])
       } finally {
         setIsReadingFile(false)
@@ -121,6 +121,41 @@ export default function Home() {
     }
 
     resetFileInput()
+  }
+
+  const hasResumeError = errors.some(
+    (e) =>
+      e.toLowerCase().includes('resume') ||
+      e.toLowerCase().includes('extract') ||
+      e.toLowerCase().includes('pdf') ||
+      e.toLowerCase().includes('file'),
+  )
+  const hasJobError = errors.some((e) =>
+    e.toLowerCase().includes('job description'),
+  )
+
+  function handleResumeTextChange(event) {
+    setResumeText(event.target.value)
+    if (hasResumeError) {
+      setErrors((prev) =>
+        prev.filter(
+          (e) =>
+            !e.toLowerCase().includes('resume') &&
+            !e.toLowerCase().includes('extract') &&
+            !e.toLowerCase().includes('pdf') &&
+            !e.toLowerCase().includes('file'),
+        ),
+      )
+    }
+  }
+
+  function handleJobDescriptionChange(event) {
+    setJobDescription(event.target.value)
+    if (hasJobError) {
+      setErrors((prev) =>
+        prev.filter((e) => !e.toLowerCase().includes('job description')),
+      )
+    }
   }
 
   function clearSelectedResume() {
@@ -160,7 +195,7 @@ export default function Home() {
     if (!resumeText.trim()) {
       nextErrors.push(
         needsTextExtract
-          ? 'This PDF or DOCX file cannot be read automatically. Paste your resume text below to continue.'
+          ? "We couldn't extract usable text from this file. Paste your resume text below to continue."
           : 'Resume is required. Upload a TXT file or paste your resume text.',
       )
     }
@@ -300,9 +335,9 @@ export default function Home() {
               ) : null}
               {needsTextExtract ? (
                 <p className={styles.extractNote}>
-                  This PDF or DOCX file was accepted, but text extraction is not
-                  available in this project. Paste the resume text below to
-                  analyze it.
+                  {resumeName.toLowerCase().endsWith('.docx')
+                    ? 'DOCX text extraction is not currently supported. Paste your resume text below to continue.'
+                    : "We couldn't extract usable text from this file. Paste your resume text below to continue."}
                 </p>
               ) : null}
               <p className={styles.divider}>OR PASTE TEXT</p>
@@ -314,7 +349,8 @@ export default function Home() {
                 className={styles.textarea}
                 placeholder="Paste your resume text here..."
                 value={resumeText}
-                onChange={(event) => setResumeText(event.target.value)}
+                onChange={handleResumeTextChange}
+                aria-invalid={hasResumeError}
               />
             </article>
 
@@ -349,7 +385,8 @@ export default function Home() {
                 className={styles.textarea}
                 placeholder="Paste the full job description here..."
                 value={jobDescription}
-                onChange={(event) => setJobDescription(event.target.value)}
+                onChange={handleJobDescriptionChange}
+                aria-invalid={hasJobError}
               />
             </article>
             {errors.length ? (
