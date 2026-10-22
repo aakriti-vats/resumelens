@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import ScoreRing from '../components/ScoreRing'
-import { useLocalHistory } from '../hooks/useLocalHistory'
+import { selectHistoryEntries } from '../store/historySlice'
 import styles from './Compare.module.css'
 
 export default function Compare() {
-  const { entries } = useLocalHistory()
+  const entries = useSelector(selectHistoryEntries)
   const versionB = entries[0]
   const versionA = entries[1]
 

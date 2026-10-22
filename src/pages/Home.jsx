@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 import ScoreRing from '../components/ScoreRing'
 import { analyzeResume } from '../utils/keywordAnalysis'
+import { extractTextFromPdf } from '../utils/pdfExtractor'
 import { useAnalysis } from '../context/AnalysisContext'
-import { useLocalHistory } from '../hooks/useLocalHistory'
+import { addAnalysis } from '../store/historySlice'
 import styles from './Home.module.css'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
@@ -50,7 +52,7 @@ function validateResumeFile(file) {
 
 export default function Home() {
   const navigate = useNavigate()
-  const { addEntry } = useLocalHistory()
+  const dispatch = useDispatch()
   const { setCurrentAnalysis } = useAnalysis()
   const fileRef = useRef(null)
   const [resumeName, setResumeName] = useState('')
@@ -89,6 +91,27 @@ export default function Home() {
         setResumeName('')
         setErrors([
           'We could not read that file. Please try again or paste your resume text below.',
+        ])
+      } finally {
+        setIsReadingFile(false)
+      }
+    } else if (kind === 'pdf') {
+      setIsReadingFile(true)
+      try {
+        const text = await extractTextFromPdf(file)
+        if (text && text.trim()) {
+          setResumeText(text.trim())
+          setNeedsTextExtract(false)
+        } else {
+          setNeedsTextExtract(true)
+          setErrors([
+            'This PDF appears to be scanned or image-based with no selectable text. Please paste your resume text below.',
+          ])
+        }
+      } catch {
+        setNeedsTextExtract(true)
+        setErrors([
+          'We could not extract text from that PDF. Please paste your resume text below to continue.',
         ])
       } finally {
         setIsReadingFile(false)
@@ -160,8 +183,13 @@ export default function Home() {
       jobTitle,
       resumeName,
     })
-    const savedRecord = addEntry(analysis)
-    setCurrentAnalysis(savedRecord)
+    const record = {
+      ...analysis,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    }
+    dispatch(addAnalysis(record))
+    setCurrentAnalysis(record)
     navigate('/results')
   }
 

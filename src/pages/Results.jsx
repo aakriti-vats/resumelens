@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import KeywordBadge from '../components/KeywordBadge'
 import ScoreRing from '../components/ScoreRing'
 import { useAnalysis } from '../context/AnalysisContext'
-import { useLocalHistory } from '../hooks/useLocalHistory'
+import { selectHistoryEntries } from '../store/historySlice'
 import { formatDateTime } from '../utils/formatDate'
 import styles from './Results.module.css'
 
@@ -14,8 +15,8 @@ function matchLabel(score) {
 
 export default function Results() {
   const { currentAnalysis } = useAnalysis()
-  const { entries, getLastAnalysis } = useLocalHistory()
-  const analysis = currentAnalysis ?? getLastAnalysis() ?? entries[0]
+  const entries = useSelector(selectHistoryEntries)
+  const analysis = currentAnalysis ?? entries[0]
 
   if (!analysis) {
     return (

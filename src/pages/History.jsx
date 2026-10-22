@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import ScoreRing from '../components/ScoreRing'
 import { useAnalysis } from '../context/AnalysisContext'
-import { useLocalHistory } from '../hooks/useLocalHistory'
+import { deleteAnalysis, selectHistoryEntries } from '../store/historySlice'
 import { formatDate } from '../utils/formatDate'
 import styles from './History.module.css'
 
 export default function History() {
-  const { entries, removeEntry, setLastAnalysis } = useLocalHistory()
+  const dispatch = useDispatch()
+  const entries = useSelector(selectHistoryEntries)
   const { setCurrentAnalysis } = useAnalysis()
 
   return (
@@ -49,10 +51,7 @@ export default function History() {
                         className={styles.iconButton}
                         to="/results"
                         aria-label={`View results for ${entry.resumeName}`}
-                        onClick={() => {
-                          setCurrentAnalysis(entry)
-                          setLastAnalysis(entry)
-                        }}
+                        onClick={() => setCurrentAnalysis(entry)}
                       >
                         View
                       </Link>
@@ -62,7 +61,7 @@ export default function History() {
                       <button
                         type="button"
                         className={styles.iconButton}
-                        onClick={() => removeEntry(entry.id)}
+                        onClick={() => dispatch(deleteAnalysis(entry.id))}
                       >
                         Delete
                       </button>
