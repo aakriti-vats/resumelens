@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import ScoreRing from '../components/ScoreRing'
+import { useAnalysis } from '../context/AnalysisContext'
 import { selectHistoryEntries } from '../store/historySlice'
 import styles from './Compare.module.css'
 
@@ -81,6 +82,8 @@ export default function Compare() {
 }
 
 function VersionCard({ title, subtitle, analysis, winner, muted }) {
+  const { setCurrentAnalysis } = useAnalysis()
+
   return (
     <article className={`${styles.card} ${winner ? styles.winner : ''} ${muted ? styles.muted : ''}`}>
       <header className={styles.cardHeader}>
@@ -111,7 +114,11 @@ function VersionCard({ title, subtitle, analysis, winner, muted }) {
           <strong>{analysis.suggestions.length}</strong>
         </li>
       </ul>
-      <Link className={winner ? styles.primary : styles.secondary} to="/results">
+      <Link
+        className={winner ? styles.primary : styles.secondary}
+        to="/results"
+        onClick={() => setCurrentAnalysis(analysis)}
+      >
         View details
       </Link>
     </article>

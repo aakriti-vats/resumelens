@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import styles from './Navbar.module.css'
 
@@ -15,9 +15,9 @@ export default function Navbar() {
   const location = useLocation()
   const signInDialogRef = useRef(null)
 
-  useEffect(() => {
+  function closeMenu() {
     setOpen(false)
-  }, [location.pathname, location.hash])
+  }
 
   function openSignInDialog() {
     setOpen(false)
@@ -31,7 +31,7 @@ export default function Navbar() {
   return (
     <header className={styles.header}>
       <nav className={styles.nav} aria-label="Primary">
-        <NavLink to="/" className={styles.brand} end>
+        <NavLink to="/" className={styles.brand} end onClick={closeMenu}>
           <span className={styles.logoMark} aria-hidden="true">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
               <path
@@ -51,6 +51,7 @@ export default function Navbar() {
               {link.hash ? (
                 <a
                   href={link.to}
+                  onClick={closeMenu}
                   className={`${styles.link} ${
                     location.pathname === '/' && location.hash === '#how-it-works'
                       ? styles.active
@@ -63,6 +64,7 @@ export default function Navbar() {
                 <NavLink
                   to={link.to}
                   end={link.end}
+                  onClick={closeMenu}
                   className={({ isActive }) =>
                     `${styles.link} ${isActive ? styles.active : ''}`
                   }
@@ -83,7 +85,7 @@ export default function Navbar() {
           <button type="button" className={styles.signIn} onClick={openSignInDialog}>
             Sign In
           </button>
-          <NavLink to="/" className={styles.cta}>
+          <NavLink to="/" className={styles.cta} onClick={closeMenu}>
             Analyze Resume
           </NavLink>
           <button

@@ -196,7 +196,7 @@ export default function Home() {
       nextErrors.push(
         needsTextExtract
           ? "We couldn't extract usable text from this file. Paste your resume text below to continue."
-          : 'Resume is required. Upload a TXT file or paste your resume text.',
+          : 'Resume is required. Upload a PDF or TXT file, or paste your resume text.',
       )
     }
 
@@ -312,7 +312,7 @@ export default function Home() {
                 <small>
                   {isReadingFile
                     ? 'Reading file…'
-                    : 'Supported formats: PDF, DOCX, TXT. Max file size 5MB. TXT is read automatically; paste PDF or DOCX text below.'}
+                    : 'Supported formats: PDF, DOCX, TXT. Max file size 5MB. PDF and TXT are read automatically; paste DOCX text below.'}
                 </small>
               </button>
               <input
