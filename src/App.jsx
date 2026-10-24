@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import Compare from './pages/Compare'
 import History from './pages/History'
 import Home from './pages/Home'
+import NotFound from './pages/NotFound'
 import Results from './pages/Results'
 import { AnalysisProvider } from './context/AnalysisContext'
 import styles from './App.module.css'
@@ -19,6 +20,7 @@ export default function App() {
             <Route path="/results" element={<Results />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/history" element={<History />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
           <Footer />
         </div>
