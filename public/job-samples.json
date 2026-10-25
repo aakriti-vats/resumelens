@@ -1,0 +1,17 @@
+[
+  {
+    "id": "1",
+    "title": "Senior Product Designer",
+    "description": "We are looking for a Senior Product Designer with experience in UX, user research, Figma, prototyping, cross-functional teams, and design systems. Responsibilities include collaborating with PMs, running usability studies, and shipping rapid prototypes. 5+ years preferred."
+  },
+  {
+    "id": "2",
+    "title": "Frontend Engineer",
+    "description": "Seeking a Frontend Engineer proficient in React, JavaScript (ES6+), CSS3, responsive design, performance optimization, and testing. Experience with Vite, bundlers, and accessibility best practices is a plus."
+  },
+  {
+    "id": "3",
+    "title": "Data Analyst",
+    "description": "Hiring a Data Analyst experienced with SQL, Python, dashboards, data visualization, statistics, and communicating insights to stakeholders. Experience with large datasets and ETL pipelines preferred."
+  }
+]

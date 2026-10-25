@@ -1,0 +1,42 @@
+.page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 24px;
+}
+
+.error {
+  color: var(--color-missing);
+  margin-top: 12px;
+}
+
+.result {
+  margin-top: 16px;
+  background: var(--color-bg);
+  padding: 16px;
+  border-radius: var(--radius-md);
+}
+
+.dropzoneActive {
+  border-color: var(--color-primary-dark) !important;
+  background: color-mix(in srgb, var(--color-primary-soft) 30%, transparent) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.dropzoneActive {
+  border-color: var(--color-primary-dark) !important;
+  background: color-mix(in srgb, var(--color-primary-soft) 30%, transparent) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
