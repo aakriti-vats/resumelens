@@ -11,11 +11,36 @@
   align-items: flex-start;
   gap: 16px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
 .heading h1 {
   font-size: 2rem;
   margin-bottom: 6px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.clearAllBtn {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-missing);
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.clearAllBtn:hover {
+  background: var(--color-missing-bg);
+  border-color: #fecaca;
 }
 
 .primary {

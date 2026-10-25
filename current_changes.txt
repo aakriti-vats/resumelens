@@ -1,0 +1,948 @@
+diff --git a/src/App.jsx b/src/App.jsx
+index 88f16db..3471c74 100644
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -5,26 +5,31 @@ import Compare from './pages/Compare'
+ import History from './pages/History'
+ import Home from './pages/Home'
+ import NotFound from './pages/NotFound'
++import Profile from './pages/Profile'
+ import Results from './pages/Results'
+ import { AnalysisProvider } from './context/AnalysisContext'
++import { AuthProvider } from './context/AuthContext'
+ import styles from './App.module.css'
+ 
+ export default function App() {
+   return (
+     <BrowserRouter>
+-      <AnalysisProvider>
+-        <div className={styles.shell}>
+-          <Navbar />
+-          <Routes>
+-            <Route path="/" element={<Home />} />
+-            <Route path="/results" element={<Results />} />
+-            <Route path="/compare" element={<Compare />} />
+-            <Route path="/history" element={<History />} />
+-            <Route path="*" element={<NotFound />} />
+-          </Routes>
+-          <Footer />
+-        </div>
+-      </AnalysisProvider>
++      <AuthProvider>
++        <AnalysisProvider>
++          <div className={styles.shell}>
++            <Navbar />
++            <Routes>
++              <Route path="/" element={<Home />} />
++              <Route path="/results" element={<Results />} />
++              <Route path="/compare" element={<Compare />} />
++              <Route path="/history" element={<History />} />
++              <Route path="/profile" element={<Profile />} />
++              <Route path="*" element={<NotFound />} />
++            </Routes>
++            <Footer />
++          </div>
++        </AnalysisProvider>
++      </AuthProvider>
+     </BrowserRouter>
+   )
+ }
+diff --git a/src/components/Navbar.jsx b/src/components/Navbar.jsx
+index 09f7453..2166228 100644
+--- a/src/components/Navbar.jsx
++++ b/src/components/Navbar.jsx
+@@ -1,5 +1,6 @@
+ import { useId, useRef, useState } from 'react'
+ import { NavLink, useLocation } from 'react-router-dom'
++import { useAuth } from '../context/AuthContext'
+ import styles from './Navbar.module.css'
+ 
+ const links = [
+@@ -10,7 +11,11 @@ const links = [
+ ]
+ 
+ export default function Navbar() {
++  const { user, login, logout } = useAuth()
+   const [open, setOpen] = useState(false)
++  const [name, setName] = useState('')
++  const [email, setEmail] = useState('')
++  const [errors, setErrors] = useState({})
+   const menuId = useId()
+   const location = useLocation()
+   const signInDialogRef = useRef(null)
+@@ -20,14 +25,52 @@ export default function Navbar() {
+   }
+ 
+   function openSignInDialog() {
++    setName('')
++    setEmail('')
++    setErrors({})
+     setOpen(false)
+     signInDialogRef.current?.showModal()
+   }
+ 
+   function closeSignInDialog() {
++    setErrors({})
+     signInDialogRef.current?.close()
+   }
+ 
++  function handleSignOut() {
++    logout()
++    closeMenu()
++  }
++
++  function handleSignInSubmit(e) {
++    e.preventDefault()
++    const trimmedName = name.trim()
++    const trimmedEmail = email.trim()
++    const nextErrors = {}
++
++    if (!trimmedName) {
++      nextErrors.name = 'Name is required'
++    }
++
++    if (!trimmedEmail) {
++      nextErrors.email = 'Email is required'
++    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
++      nextErrors.email = 'Please enter a valid email address'
++    }
++
++    if (Object.keys(nextErrors).length > 0) {
++      setErrors(nextErrors)
++      return
++    }
++
++    login({
++      name: trimmedName,
++      email: trimmedEmail,
++      createdAt: new Date().toISOString(),
++    })
++    closeSignInDialog()
++  }
++
+   return (
+     <header className={styles.header}>
+       <nav className={styles.nav} aria-label="Primary">
+@@ -74,17 +117,76 @@ export default function Navbar() {
+               )}
+             </li>
+           ))}
+-          <li className={styles.mobileOnly}>
+-            <button type="button" className={styles.signIn} onClick={openSignInDialog}>
+-              Sign In
+-            </button>
+-          </li>
++
++          {user ? (
++            <>
++              <li className={styles.mobileOnly}>
++                <NavLink
++                  to="/profile"
++                  onClick={closeMenu}
++                  className={({ isActive }) =>
++                    `${styles.link} ${isActive ? styles.active : ''}`
++                  }
++                >
++                  Profile ({user.name || user.email || 'User'})
++                </NavLink>
++              </li>
++              <li className={styles.mobileOnly}>
++                <button
++                  type="button"
++                  className={styles.mobileSignOut}
++                  onClick={handleSignOut}
++                >
++                  Sign Out
++                </button>
++              </li>
++            </>
++          ) : (
++            <li className={styles.mobileOnly}>
++              <button
++                type="button"
++                className={styles.signIn}
++                onClick={openSignInDialog}
++              >
++                Sign In
++              </button>
++            </li>
++          )}
+         </ul>
+ 
+         <div className={styles.actions}>
+-          <button type="button" className={styles.signIn} onClick={openSignInDialog}>
+-            Sign In
+-          </button>
++          {user ? (
++            <>
++              <NavLink
++                to="/profile"
++                className={({ isActive }) =>
++                  `${styles.profileLink} ${isActive ? styles.activeProfile : ''}`
++                }
++                onClick={closeMenu}
++              >
++                <span className={styles.avatarIcon} aria-hidden="true">
++                  {(user.name || user.email || 'U').charAt(0).toUpperCase()}
++                </span>
++                <span className={styles.profileName}>{user.name || user.email || 'Demo User'}</span>
++              </NavLink>
++              <button
++                type="button"
++                className={styles.signOutBtn}
++                onClick={handleSignOut}
++              >
++                Sign Out
++              </button>
++            </>
++          ) : (
++            <button
++              type="button"
++              className={styles.signIn}
++              onClick={openSignInDialog}
++            >
++              Sign In
++            </button>
++          )}
++
+           <NavLink to="/" className={styles.cta} onClick={closeMenu}>
+             Analyze Resume
+           </NavLink>
+@@ -108,14 +210,91 @@ export default function Navbar() {
+         className={styles.signInDialog}
+         aria-labelledby="signin-dialog-title"
+       >
+-        <h2 id="signin-dialog-title">Sign in to ResumeLens</h2>
+-        <p>
+-          Accounts are not set up in this version yet. Your analyses stay saved
+-          privately in this browser.
++        <div className={styles.dialogHeader}>
++          <h2 id="signin-dialog-title">Demo Profile Sign In</h2>
++          <button
++            type="button"
++            className={styles.dialogClose}
++            onClick={closeSignInDialog}
++            aria-label="Close dialog"
++          >
++            &times;
++          </button>
++        </div>
++        <p className={styles.demoNotice}>
++          This is a local demo session stored in your browser. No password or
++          backend server is required.
+         </p>
+-        <button type="button" className={styles.cta} onClick={closeSignInDialog}>
+-          Got it
+-        </button>
++        <form
++          className={styles.dialogForm}
++          onSubmit={handleSignInSubmit}
++          noValidate
++        >
++          <div className={styles.field}>
++            <label htmlFor="signin-name" className={styles.fieldLabel}>
++              Name
++            </label>
++            <input
++              id="signin-name"
++              type="text"
++              className={`${styles.input} ${errors.name ? styles.inputError : ''}`}
++              value={name}
++              onChange={(e) => {
++                setName(e.target.value)
++                if (errors.name) {
++                  setErrors((prev) => ({ ...prev, name: undefined }))
++                }
++              }}
++              placeholder="e.g. Alex Doe"
++              aria-invalid={Boolean(errors.name)}
++              aria-describedby={errors.name ? 'signin-name-error' : undefined}
++            />
++            {errors.name && (
++              <span id="signin-name-error" className={styles.errorText} role="alert">
++                {errors.name}
++              </span>
++            )}
++          </div>
++
++          <div className={styles.field}>
++            <label htmlFor="signin-email" className={styles.fieldLabel}>
++              Email
++            </label>
++            <input
++              id="signin-email"
++              type="email"
++              className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
++              value={email}
++              onChange={(e) => {
++                setEmail(e.target.value)
++                if (errors.email) {
++                  setErrors((prev) => ({ ...prev, email: undefined }))
++                }
++              }}
++              placeholder="alex@example.com"
++              aria-invalid={Boolean(errors.email)}
++              aria-describedby={errors.email ? 'signin-email-error' : undefined}
++            />
++            {errors.email && (
++              <span id="signin-email-error" className={styles.errorText} role="alert">
++                {errors.email}
++              </span>
++            )}
++          </div>
++
++          <div className={styles.dialogActions}>
++            <button
++              type="button"
++              className={styles.cancelBtn}
++              onClick={closeSignInDialog}
++            >
++              Cancel
++            </button>
++            <button type="submit" className={styles.cta}>
++              Sign In
++            </button>
++          </div>
++        </form>
+       </dialog>
+     </header>
+   )
+diff --git a/src/components/Navbar.module.css b/src/components/Navbar.module.css
+index 1e2532d..8f572e4 100644
+--- a/src/components/Navbar.module.css
++++ b/src/components/Navbar.module.css
+@@ -83,30 +83,197 @@
+   color: var(--color-text);
+ }
+ 
++.profileLink {
++  display: inline-flex;
++  align-items: center;
++  gap: 8px;
++  padding: 6px 12px;
++  border-radius: var(--radius-pill);
++  background: var(--color-bg);
++  border: 1px solid var(--color-border);
++  color: var(--color-text);
++  font-size: 0.875rem;
++  font-weight: 600;
++  text-decoration: none;
++  transition: border-color 0.15s ease, background-color 0.15s ease;
++}
++
++.profileLink:hover,
++.activeProfile {
++  border-color: var(--color-primary);
++  background: var(--color-primary-soft);
++  color: var(--color-primary-dark);
++}
++
++.avatarIcon {
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  width: 24px;
++  height: 24px;
++  border-radius: var(--radius-pill);
++  background: var(--color-primary);
++  color: #fff;
++  font-size: 0.75rem;
++  font-weight: 700;
++}
++
++.profileName {
++  max-width: 120px;
++  overflow: hidden;
++  text-overflow: ellipsis;
++  white-space: nowrap;
++}
++
++.signOutBtn {
++  border: 1px solid var(--color-border);
++  background: transparent;
++  padding: 7px 12px;
++  border-radius: 8px;
++  font-size: 0.875rem;
++  font-weight: 500;
++  color: var(--color-text-muted);
++  cursor: pointer;
++  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
++}
++
++.signOutBtn:hover {
++  color: var(--color-missing);
++  border-color: #fecaca;
++  background: var(--color-missing-bg);
++}
++
+ .mobileOnly {
+   display: none;
+ }
+ 
++.mobileSignOut {
++  border: 0;
++  background: none;
++  padding: 12px 0;
++  font-size: 0.9375rem;
++  font-weight: 600;
++  color: var(--color-missing);
++  text-align: left;
++  cursor: pointer;
++}
++
+ .signInDialog {
+   border: 0;
+   border-radius: var(--radius-lg);
+   box-shadow: var(--shadow-md);
+-  padding: 28px;
+-  width: min(400px, calc(100vw - 48px));
++  padding: 24px 28px;
++  width: min(420px, calc(100vw - 48px));
++  background: var(--color-surface);
+ }
+ 
+ .signInDialog::backdrop {
+   background: rgba(15, 23, 42, 0.45);
+ }
+ 
+-.signInDialog h2 {
++.dialogHeader {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  margin-bottom: 6px;
++}
++
++.dialogHeader h2 {
+   font-size: 1.25rem;
+-  margin-bottom: 8px;
++  margin: 0;
++  color: var(--color-text);
+ }
+ 
+-.signInDialog p {
++.dialogClose {
++  border: 0;
++  background: none;
++  font-size: 1.5rem;
++  line-height: 1;
+   color: var(--color-text-muted);
+-  margin-bottom: 20px;
++  cursor: pointer;
++  padding: 0 4px;
++}
++
++.dialogClose:hover {
++  color: var(--color-text);
++}
++
++.demoNotice {
++  color: var(--color-text-muted);
++  font-size: 0.875rem;
++  line-height: 1.45;
++  margin: 0 0 18px;
++}
++
++.dialogForm {
++  display: flex;
++  flex-direction: column;
++  gap: 14px;
++}
++
++.field {
++  display: flex;
++  flex-direction: column;
++  gap: 6px;
++}
++
++.fieldLabel {
++  font-size: 0.8125rem;
++  font-weight: 600;
++  color: var(--color-text);
++}
++
++.input {
++  border: 1px solid var(--color-border);
++  border-radius: var(--radius-sm);
++  padding: 9px 12px;
++  font-size: 0.875rem;
++  color: var(--color-text);
++  background: var(--color-surface);
++  outline: none;
++  font-family: inherit;
++  transition: border-color 0.15s ease, box-shadow 0.15s ease;
++}
++
++.input:focus {
++  border-color: var(--color-primary);
++  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
++}
++
++.inputError {
++  border-color: var(--color-missing);
++}
++
++.inputError:focus {
++  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
++}
++
++.errorText {
++  color: var(--color-missing);
++  font-size: 0.75rem;
++  font-weight: 500;
++}
++
++.dialogActions {
++  display: flex;
++  justify-content: flex-end;
++  gap: 10px;
++  margin-top: 8px;
++}
++
++.cancelBtn {
++  border: 1px solid var(--color-border);
++  background: transparent;
++  color: var(--color-text-secondary);
++  font-weight: 600;
++  font-size: 0.875rem;
++  padding: 9px 14px;
++  border-radius: 10px;
++  cursor: pointer;
++}
++
++.cancelBtn:hover {
++  background: var(--color-bg);
+ }
+ 
+ .cta {
+@@ -118,8 +285,10 @@
+   font-weight: 600;
+   font-size: 0.875rem;
+   padding: 10px 16px;
++  border: 0;
+   border-radius: 10px;
+   box-shadow: var(--shadow-sm);
++  cursor: pointer;
+ }
+ 
+ .cta:hover {
+@@ -178,6 +347,11 @@
+     display: none;
+   }
+ 
++  .profileLink,
++  .signOutBtn {
++    display: none;
++  }
++
+   .mobileOnly {
+     display: list-item;
+   }
+diff --git a/src/context/AnalysisContext.jsx b/src/context/AnalysisContext.jsx
+index 82978be..e78fe80 100644
+--- a/src/context/AnalysisContext.jsx
++++ b/src/context/AnalysisContext.jsx
+@@ -1,22 +1,30 @@
+ import { createContext, useContext, useState } from 'react'
++import { useAuth } from './AuthContext'
+ 
+ const AnalysisContext = createContext(null)
+ 
+ const STORAGE_KEY = 'resumelens-last-analysis'
+ 
+-function readSavedAnalysis() {
++function readSavedAnalyses() {
+   try {
+     const raw = localStorage.getItem(STORAGE_KEY)
+-    return raw ? JSON.parse(raw) : null
++    if (!raw) return {}
++    const parsed = JSON.parse(raw)
++    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
++    // If legacy single analysis record was stored, migrate it safely to guest
++    if (parsed.id && typeof parsed.id === 'string' && parsed.score !== undefined) {
++      return { guest: { ...parsed, profileId: null } }
++    }
++    return parsed
+   } catch {
+-    return null
++    return {}
+   }
+ }
+ 
+-function writeSavedAnalysis(value) {
++function writeSavedAnalyses(analyses) {
+   try {
+-    if (value) {
+-      localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
++    if (analyses && typeof analyses === 'object' && Object.keys(analyses).length > 0) {
++      localStorage.setItem(STORAGE_KEY, JSON.stringify(analyses))
+     } else {
+       localStorage.removeItem(STORAGE_KEY)
+     }
+@@ -26,16 +34,39 @@ function writeSavedAnalysis(value) {
+ }
+ 
+ export function AnalysisProvider({ children }) {
+-  const [currentAnalysis, setCurrentAnalysisState] = useState(readSavedAnalysis)
++  const { user } = useAuth()
++  const [analysesByProfile, setAnalysesByProfile] = useState(readSavedAnalyses)
++
++  const activeKey = user?.id ?? 'guest'
++  const profileRecord =
++    analysesByProfile && typeof analysesByProfile === 'object' && !Array.isArray(analysesByProfile)
++      ? analysesByProfile[activeKey]
++      : null
++  const currentAnalysis =
++    profileRecord && typeof profileRecord === 'object' && profileRecord.id ? profileRecord : null
+ 
+   const setCurrentAnalysis = (analysis) => {
+-    setCurrentAnalysisState(analysis)
+-    writeSavedAnalysis(analysis)
++    if (!analysis || typeof analysis !== 'object') return
++    const record = {
++      ...analysis,
++      profileId: user?.id ?? null,
++    }
++    setAnalysesByProfile((prev) => {
++      const base = prev && typeof prev === 'object' && !Array.isArray(prev) ? prev : {}
++      const next = { ...base, [activeKey]: record }
++      writeSavedAnalyses(next)
++      return next
++    })
+   }
+ 
+   const clearCurrentAnalysis = () => {
+-    setCurrentAnalysisState(null)
+-    writeSavedAnalysis(null)
++    setAnalysesByProfile((prev) => {
++      const base = prev && typeof prev === 'object' && !Array.isArray(prev) ? prev : {}
++      const next = { ...base }
++      delete next[activeKey]
++      writeSavedAnalyses(next)
++      return next
++    })
+   }
+ 
+   return (
+diff --git a/src/pages/Compare.jsx b/src/pages/Compare.jsx
+index b364487..84be423 100644
+--- a/src/pages/Compare.jsx
++++ b/src/pages/Compare.jsx
+@@ -2,11 +2,13 @@ import { Link } from 'react-router-dom'
+ import { useSelector } from 'react-redux'
+ import ScoreRing from '../components/ScoreRing'
+ import { useAnalysis } from '../context/AnalysisContext'
+-import { selectHistoryEntries } from '../store/historySlice'
++import { useAuth } from '../context/AuthContext'
++import { selectHistoryByProfile } from '../store/historySlice'
+ import styles from './Compare.module.css'
+ 
+ export default function Compare() {
+-  const entries = useSelector(selectHistoryEntries)
++  const { user } = useAuth()
++  const entries = useSelector((state) => selectHistoryByProfile(state, user?.id))
+   const versionB = entries[0]
+   const versionA = entries[1]
+ 
+diff --git a/src/pages/History.jsx b/src/pages/History.jsx
+index 2b86b47..d8bf969 100644
+--- a/src/pages/History.jsx
++++ b/src/pages/History.jsx
+@@ -3,14 +3,20 @@ import { Link } from 'react-router-dom'
+ import { useDispatch, useSelector } from 'react-redux'
+ import ScoreRing from '../components/ScoreRing'
+ import { useAnalysis } from '../context/AnalysisContext'
+-import { deleteAnalysis, selectHistoryEntries } from '../store/historySlice'
++import { useAuth } from '../context/AuthContext'
++import {
++  clearHistory,
++  deleteAnalysis,
++  selectHistoryByProfile,
++} from '../store/historySlice'
+ import { formatDate } from '../utils/formatDate'
+ import styles from './History.module.css'
+ 
+ export default function History() {
+   const dispatch = useDispatch()
+-  const entries = useSelector(selectHistoryEntries)
+-  const { setCurrentAnalysis } = useAnalysis()
++  const { user } = useAuth()
++  const entries = useSelector((state) => selectHistoryByProfile(state, user?.id))
++  const { currentAnalysis, setCurrentAnalysis, clearCurrentAnalysis } = useAnalysis()
+ 
+   const [searchTerm, setSearchTerm] = useState('')
+   const [sortBy, setSortBy] = useState('newest')
+@@ -57,22 +63,53 @@ export default function History() {
+     return 0
+   })
+ 
++  function handleDelete(id) {
++    dispatch(deleteAnalysis(id))
++    if (currentAnalysis?.id === id) {
++      clearCurrentAnalysis()
++    }
++  }
++
++  function handleClearHistory() {
++    dispatch(clearHistory(user?.id ?? null))
++    clearCurrentAnalysis()
++  }
++
+   return (
+     <main className={styles.page}>
+       <header className={styles.heading}>
+         <div>
+           <h1>Analysis History</h1>
+-          <p>Your recent resume reviews, stored locally in this browser.</p>
++          <p>
++            {user
++              ? `Saved resume reviews for ${user.name}.`
++              : 'Your recent resume reviews, stored locally in this browser.'}
++          </p>
++        </div>
++        <div className={styles.headerActions}>
++          {entries.length > 0 && (
++            <button
++              type="button"
++              className={styles.clearAllBtn}
++              onClick={handleClearHistory}
++            >
++              Clear History
++            </button>
++          )}
++          <Link className={styles.primary} to="/">
++            + New Analysis
++          </Link>
+         </div>
+-        <Link className={styles.primary} to="/">
+-          + New Analysis
+-        </Link>
+       </header>
+ 
+       {entries.length === 0 ? (
+         <section className={styles.empty}>
+           <h2>No scans yet</h2>
+-          <p>Analyze a resume to start building local history.</p>
++          <p>
++            {user
++              ? `No analyses saved for ${user.name} yet. Analyze a resume to get started.`
++              : 'Analyze a resume to start building local history.'}
++          </p>
+           <Link className={styles.primary} to="/">
+             Analyze Resume
+           </Link>
+@@ -166,7 +203,7 @@ export default function History() {
+                         <button
+                           type="button"
+                           className={styles.iconButton}
+-                          onClick={() => dispatch(deleteAnalysis(entry.id))}
++                          onClick={() => handleDelete(entry.id)}
+                         >
+                           Delete
+                         </button>
+diff --git a/src/pages/History.module.css b/src/pages/History.module.css
+index 4b0f376..e5353c8 100644
+--- a/src/pages/History.module.css
++++ b/src/pages/History.module.css
+@@ -11,6 +11,7 @@
+   align-items: flex-start;
+   gap: 16px;
+   margin-bottom: 24px;
++  flex-wrap: wrap;
+ }
+ 
+ .heading h1 {
+@@ -18,6 +19,30 @@
+   margin-bottom: 6px;
+ }
+ 
++.headerActions {
++  display: flex;
++  align-items: center;
++  gap: 12px;
++  flex-wrap: wrap;
++}
++
++.clearAllBtn {
++  border: 1px solid var(--color-border);
++  background: transparent;
++  color: var(--color-missing);
++  padding: 9px 14px;
++  border-radius: 10px;
++  font-size: 0.875rem;
++  font-weight: 600;
++  cursor: pointer;
++  transition: background-color 0.15s ease, border-color 0.15s ease;
++}
++
++.clearAllBtn:hover {
++  background: var(--color-missing-bg);
++  border-color: #fecaca;
++}
++
+ .primary {
+   display: inline-flex;
+   align-items: center;
+diff --git a/src/pages/Home.jsx b/src/pages/Home.jsx
+index aee441c..72bd355 100644
+--- a/src/pages/Home.jsx
++++ b/src/pages/Home.jsx
+@@ -5,6 +5,7 @@ import ScoreRing from '../components/ScoreRing'
+ import { analyzeResume } from '../utils/keywordAnalysis'
+ import { extractTextFromPdf } from '../utils/pdfExtractor'
+ import { useAnalysis } from '../context/AnalysisContext'
++import { useAuth } from '../context/AuthContext'
+ import { addAnalysis } from '../store/historySlice'
+ import styles from './Home.module.css'
+ 
+@@ -53,6 +54,7 @@ function validateResumeFile(file) {
+ export default function Home() {
+   const navigate = useNavigate()
+   const dispatch = useDispatch()
++  const { user } = useAuth()
+   const { setCurrentAnalysis } = useAnalysis()
+   const fileRef = useRef(null)
+   const [resumeName, setResumeName] = useState('')
+@@ -221,6 +223,7 @@ export default function Home() {
+     const record = {
+       ...analysis,
+       id: crypto.randomUUID(),
++      profileId: user?.id ?? null,
+       createdAt: new Date().toISOString(),
+     }
+     dispatch(addAnalysis(record))
+diff --git a/src/pages/Results.jsx b/src/pages/Results.jsx
+index 26ff994..b6f99a9 100644
+--- a/src/pages/Results.jsx
++++ b/src/pages/Results.jsx
+@@ -3,7 +3,8 @@ import { useSelector } from 'react-redux'
+ import KeywordBadge from '../components/KeywordBadge'
+ import ScoreRing from '../components/ScoreRing'
+ import { useAnalysis } from '../context/AnalysisContext'
+-import { selectHistoryEntries } from '../store/historySlice'
++import { useAuth } from '../context/AuthContext'
++import { selectHistoryByProfile } from '../store/historySlice'
+ import { formatDateTime } from '../utils/formatDate'
+ import styles from './Results.module.css'
+ 
+@@ -14,9 +15,12 @@ function matchLabel(score) {
+ }
+ 
+ export default function Results() {
++  const { user } = useAuth()
+   const { currentAnalysis } = useAnalysis()
+-  const entries = useSelector(selectHistoryEntries)
+-  const analysis = currentAnalysis ?? entries[0]
++  const entries = useSelector((state) => selectHistoryByProfile(state, user?.id))
++  const isCurrentMatchingProfile =
++    currentAnalysis && (currentAnalysis.profileId ?? null) === (user?.id ?? null)
++  const analysis = isCurrentMatchingProfile ? currentAnalysis : entries[0]
+ 
+   if (!analysis) {
+     return (
+diff --git a/src/store/historySlice.js b/src/store/historySlice.js
+index 537231d..ff44060 100644
+--- a/src/store/historySlice.js
++++ b/src/store/historySlice.js
+@@ -2,11 +2,21 @@ import { createSlice } from '@reduxjs/toolkit'
+ 
+ const STORAGE_KEY = 'resumelens-history'
+ 
++function normalizeEntry(entry) {
++  if (!entry || typeof entry !== 'object' || !entry.id) return null
++  return {
++    ...entry,
++    profileId: entry.profileId ?? null,
++  }
++}
++
+ function readSavedHistory() {
+   try {
+     const raw = localStorage.getItem(STORAGE_KEY)
+-    const parsed = raw ? JSON.parse(raw) : []
+-    return Array.isArray(parsed) ? parsed : []
++    if (!raw) return []
++    const parsed = JSON.parse(raw)
++    if (!Array.isArray(parsed)) return []
++    return parsed.map(normalizeEntry).filter(Boolean)
+   } catch {
+     return []
+   }
+@@ -21,19 +31,40 @@ export const historySlice = createSlice({
+   initialState,
+   reducers: {
+     addAnalysis: (state, action) => {
+-      state.entries.unshift(action.payload)
++      const normalized = normalizeEntry(action.payload)
++      if (normalized) {
++        state.entries.unshift(normalized)
++      }
+     },
+     deleteAnalysis: (state, action) => {
+-      state.entries = state.entries.filter((entry) => entry.id !== action.payload)
++      const targetId = typeof action.payload === 'object' ? action.payload?.id : action.payload
++      state.entries = state.entries.filter((entry) => entry && entry.id !== targetId)
+     },
+-    clearHistory: (state) => {
+-      state.entries = []
++    clearHistory: (state, action) => {
++      if (action && action.payload !== undefined) {
++        const targetProfileId =
++          typeof action.payload === 'object' ? action.payload?.profileId : action.payload
++        state.entries = state.entries.filter(
++          (entry) => (entry?.profileId ?? null) !== (targetProfileId ?? null)
++        )
++      } else {
++        state.entries = []
++      }
+     },
+   },
+ })
+ 
+ export const { addAnalysis, deleteAnalysis, clearHistory } = historySlice.actions
+ 
+-export const selectHistoryEntries = (state) => state.history.entries
++export const selectAllHistoryEntries = (state) => state?.history?.entries || []
++
++export const selectHistoryEntries = (state) => state?.history?.entries || []
++
++export const selectHistoryByProfile = (state, profileId) => {
++  const targetId = profileId ?? null
++  const entries = state?.history?.entries
++  if (!Array.isArray(entries)) return []
++  return entries.filter((entry) => entry && (entry.profileId ?? null) === targetId)
++}
+ 
+ export default historySlice.reducer
+diff --git a/src/utils/formatDate.js b/src/utils/formatDate.js
+index 41a0230..25985dc 100644
+--- a/src/utils/formatDate.js
++++ b/src/utils/formatDate.js
+@@ -19,10 +19,24 @@ const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
+ 
+ /** "Aug 23, 2026" */
+ export function formatDate(iso) {
+-  return dateFormatter.format(new Date(iso))
++  try {
++    if (!iso) return 'Recently'
++    const d = new Date(iso)
++    if (Number.isNaN(d.getTime())) return 'Recently'
++    return dateFormatter.format(d)
++  } catch {
++    return 'Recently'
++  }
+ }
+ 
+ /** "Aug 23, 2026, 9:15 PM" */
+ export function formatDateTime(iso) {
+-  return dateTimeFormatter.format(new Date(iso))
++  try {
++    if (!iso) return 'Active session'
++    const d = new Date(iso)
++    if (Number.isNaN(d.getTime())) return 'Active session'
++    return dateTimeFormatter.format(d)
++  } catch {
++    return 'Active session'
++  }
+ }
+\ No newline at end of file

@@ -3,14 +3,20 @@ import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import ScoreRing from '../components/ScoreRing'
 import { useAnalysis } from '../context/AnalysisContext'
-import { deleteAnalysis, selectHistoryEntries } from '../store/historySlice'
+import { useAuth } from '../context/AuthContext'
+import {
+  clearHistory,
+  deleteAnalysis,
+  selectHistoryByProfile,
+} from '../store/historySlice'
 import { formatDate } from '../utils/formatDate'
 import styles from './History.module.css'
 
 export default function History() {
   const dispatch = useDispatch()
-  const entries = useSelector(selectHistoryEntries)
-  const { setCurrentAnalysis } = useAnalysis()
+  const { user } = useAuth()
+  const entries = useSelector((state) => selectHistoryByProfile(state, user?.id))
+  const { currentAnalysis, setCurrentAnalysis, clearCurrentAnalysis } = useAnalysis()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('newest')
@@ -57,22 +63,53 @@ export default function History() {
     return 0
   })
 
+  function handleDelete(id) {
+    dispatch(deleteAnalysis(id))
+    if (currentAnalysis?.id === id) {
+      clearCurrentAnalysis()
+    }
+  }
+
+  function handleClearHistory() {
+    dispatch(clearHistory(user?.id ?? null))
+    clearCurrentAnalysis()
+  }
+
   return (
     <main className={styles.page}>
       <header className={styles.heading}>
         <div>
           <h1>Analysis History</h1>
-          <p>Your recent resume reviews, stored locally in this browser.</p>
+          <p>
+            {user
+              ? `Saved resume reviews for ${user.name}.`
+              : 'Your recent resume reviews, stored locally in this browser.'}
+          </p>
         </div>
-        <Link className={styles.primary} to="/">
-          + New Analysis
-        </Link>
+        <div className={styles.headerActions}>
+          {entries.length > 0 && (
+            <button
+              type="button"
+              className={styles.clearAllBtn}
+              onClick={handleClearHistory}
+            >
+              Clear History
+            </button>
+          )}
+          <Link className={styles.primary} to="/">
+            + New Analysis
+          </Link>
+        </div>
       </header>
 
       {entries.length === 0 ? (
         <section className={styles.empty}>
           <h2>No scans yet</h2>
-          <p>Analyze a resume to start building local history.</p>
+          <p>
+            {user
+              ? `No analyses saved for ${user.name} yet. Analyze a resume to get started.`
+              : 'Analyze a resume to start building local history.'}
+          </p>
           <Link className={styles.primary} to="/">
             Analyze Resume
           </Link>
@@ -166,7 +203,7 @@ export default function History() {
                         <button
                           type="button"
                           className={styles.iconButton}
-                          onClick={() => dispatch(deleteAnalysis(entry.id))}
+                          onClick={() => handleDelete(entry.id)}
                         >
                           Delete
                         </button>

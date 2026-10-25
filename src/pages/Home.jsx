@@ -5,6 +5,7 @@ import ScoreRing from '../components/ScoreRing'
 import { analyzeResume } from '../utils/keywordAnalysis'
 import { extractTextFromPdf } from '../utils/pdfExtractor'
 import { useAnalysis } from '../context/AnalysisContext'
+import { useAuth } from '../context/AuthContext'
 import { addAnalysis } from '../store/historySlice'
 import styles from './Home.module.css'
 
@@ -53,6 +54,7 @@ function validateResumeFile(file) {
 export default function Home() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const { user } = useAuth()
   const { setCurrentAnalysis } = useAnalysis()
   const fileRef = useRef(null)
   const [resumeName, setResumeName] = useState('')
@@ -221,6 +223,7 @@ export default function Home() {
     const record = {
       ...analysis,
       id: crypto.randomUUID(),
+      profileId: user?.id ?? null,
       createdAt: new Date().toISOString(),
     }
     dispatch(addAnalysis(record))

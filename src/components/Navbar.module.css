@@ -83,30 +83,197 @@
   color: var(--color-text);
 }
 
+.profileLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.profileLink:hover,
+.activeProfile {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+}
+
+.avatarIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.profileName {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signOutBtn {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.signOutBtn:hover {
+  color: var(--color-missing);
+  border-color: #fecaca;
+  background: var(--color-missing-bg);
+}
+
 .mobileOnly {
   display: none;
+}
+
+.mobileSignOut {
+  border: 0;
+  background: none;
+  padding: 12px 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-missing);
+  text-align: left;
+  cursor: pointer;
 }
 
 .signInDialog {
   border: 0;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  padding: 28px;
-  width: min(400px, calc(100vw - 48px));
+  padding: 24px 28px;
+  width: min(420px, calc(100vw - 48px));
+  background: var(--color-surface);
 }
 
 .signInDialog::backdrop {
   background: rgba(15, 23, 42, 0.45);
 }
 
-.signInDialog h2 {
-  font-size: 1.25rem;
-  margin-bottom: 8px;
+.dialogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
 }
 
-.signInDialog p {
+.dialogHeader h2 {
+  font-size: 1.25rem;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.dialogClose {
+  border: 0;
+  background: none;
+  font-size: 1.5rem;
+  line-height: 1;
   color: var(--color-text-muted);
-  margin-bottom: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.dialogClose:hover {
+  color: var(--color-text);
+}
+
+.demoNotice {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  margin: 0 0 18px;
+}
+
+.dialogForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.input {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.inputError {
+  border-color: var(--color-missing);
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.errorText {
+  color: var(--color-missing);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cancelBtn {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 9px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  background: var(--color-bg);
 }
 
 .cta {
@@ -118,8 +285,10 @@
   font-weight: 600;
   font-size: 0.875rem;
   padding: 10px 16px;
+  border: 0;
   border-radius: 10px;
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
 }
 
 .cta:hover {
@@ -175,6 +344,11 @@
   }
 
   .signIn {
+    display: none;
+  }
+
+  .profileLink,
+  .signOutBtn {
     display: none;
   }
 

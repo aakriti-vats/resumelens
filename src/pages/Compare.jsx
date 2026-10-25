@@ -2,11 +2,13 @@ import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import ScoreRing from '../components/ScoreRing'
 import { useAnalysis } from '../context/AnalysisContext'
-import { selectHistoryEntries } from '../store/historySlice'
+import { useAuth } from '../context/AuthContext'
+import { selectHistoryByProfile } from '../store/historySlice'
 import styles from './Compare.module.css'
 
 export default function Compare() {
-  const entries = useSelector(selectHistoryEntries)
+  const { user } = useAuth()
+  const entries = useSelector((state) => selectHistoryByProfile(state, user?.id))
   const versionB = entries[0]
   const versionA = entries[1]
 

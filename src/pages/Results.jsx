@@ -3,7 +3,8 @@ import { useSelector } from 'react-redux'
 import KeywordBadge from '../components/KeywordBadge'
 import ScoreRing from '../components/ScoreRing'
 import { useAnalysis } from '../context/AnalysisContext'
-import { selectHistoryEntries } from '../store/historySlice'
+import { useAuth } from '../context/AuthContext'
+import { selectHistoryByProfile } from '../store/historySlice'
 import { formatDateTime } from '../utils/formatDate'
 import styles from './Results.module.css'
 
@@ -14,9 +15,12 @@ function matchLabel(score) {
 }
 
 export default function Results() {
+  const { user } = useAuth()
   const { currentAnalysis } = useAnalysis()
-  const entries = useSelector(selectHistoryEntries)
-  const analysis = currentAnalysis ?? entries[0]
+  const entries = useSelector((state) => selectHistoryByProfile(state, user?.id))
+  const isCurrentMatchingProfile =
+    currentAnalysis && (currentAnalysis.profileId ?? null) === (user?.id ?? null)
+  const analysis = isCurrentMatchingProfile ? currentAnalysis : entries[0]
 
   if (!analysis) {
     return (

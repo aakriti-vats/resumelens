@@ -5,26 +5,31 @@ import Compare from './pages/Compare'
 import History from './pages/History'
 import Home from './pages/Home'
 import NotFound from './pages/NotFound'
+import Profile from './pages/Profile'
 import Results from './pages/Results'
 import { AnalysisProvider } from './context/AnalysisContext'
+import { AuthProvider } from './context/AuthContext'
 import styles from './App.module.css'
 
 export default function App() {
   return (
     <BrowserRouter>
-      <AnalysisProvider>
-        <div className={styles.shell}>
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/compare" element={<Compare />} />
-            <Route path="/history" element={<History />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Footer />
-        </div>
-      </AnalysisProvider>
+      <AuthProvider>
+        <AnalysisProvider>
+          <div className={styles.shell}>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/results" element={<Results />} />
+              <Route path="/compare" element={<Compare />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Footer />
+          </div>
+        </AnalysisProvider>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

@@ -19,10 +19,24 @@ const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
 
 /** "Aug 23, 2026" */
 export function formatDate(iso) {
-  return dateFormatter.format(new Date(iso))
+  try {
+    if (!iso) return 'Recently'
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return 'Recently'
+    return dateFormatter.format(d)
+  } catch {
+    return 'Recently'
+  }
 }
 
 /** "Aug 23, 2026, 9:15 PM" */
 export function formatDateTime(iso) {
-  return dateTimeFormatter.format(new Date(iso))
+  try {
+    if (!iso) return 'Active session'
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return 'Active session'
+    return dateTimeFormatter.format(d)
+  } catch {
+    return 'Active session'
+  }
 }
